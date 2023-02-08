@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 
 export default async function handler(req: NextApiRequestWithSocket, res: NextApiResponseWithSocket) {
 
-    const handleDb = async (value : string, increment : boolean) => {
+    const handleDb = async (value : string, increment? : boolean) => {
         try {
             const client = await clientPromise;
             const db = client.db("scoreboard");
@@ -13,13 +13,24 @@ export default async function handler(req: NextApiRequestWithSocket, res: NextAp
             if (!score) {
                 return res.status(404).json({ message: "Score not found" });
             }
-            const newScore = await collection.findOneAndUpdate({ _id: new ObjectId(process.env.DB_ITEM_ID) }, { $set: { [value]: score[value] + (increment ? 1 : -1) } });
-            if (!newScore) {
-                return res.status(500).json({ message: "Error updating score" });
+            if (value === "flipScore") {
+                const newScore = await collection.findOneAndUpdate({ _id: new ObjectId(process.env.DB_ITEM_ID) }, { $set: { flipped: !score.flipped } });
+                if (!newScore) {
+                    return res.status(500).json({ message: "Error updating score" });
+                }
+                console.log(newScore.value);
+                req.io.emit("updateScore", newScore.value);
+                return res.status(200).json({ message: "Score updated" });
             }
-            console.log(newScore.value);
-            req.io.emit("updateScore", newScore.value);
-            return res.status(200).json({ message: "Score updated" });
+            else {
+                const newScore = await collection.findOneAndUpdate({ _id: new ObjectId(process.env.DB_ITEM_ID) }, { $set: { [value]: score[value] + (increment ? 1 : -1) } });
+                if (!newScore) {
+                    return res.status(500).json({ message: "Error updating score" });
+                }
+                console.log(newScore.value);
+                req.io.emit("updateScore", newScore.value);
+                return res.status(200).json({ message: "Score updated" });
+            }
         }
         catch (error) {
             return res.status(500).json({ message: "Error connecting to database" });
@@ -40,6 +51,9 @@ export default async function handler(req: NextApiRequestWithSocket, res: NextAp
                 return;
             case "decRightScore":
                 await handleDb("rightScore", false);
+                return;
+            case "flipScore":
+                await handleDb("flipScore");
                 return;
             default:
                 return res.status(400).json({ message: "Invalid action" });

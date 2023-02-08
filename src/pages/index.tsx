@@ -10,6 +10,7 @@ export default function Home() {
 
   const [leftScore, setLeftScore] = useState(0);
   const [rightScore, setRightScore] = useState(0);
+  const [flipped, setFlipped] = useState(false);
 
   useEffect(() => {
 
@@ -19,6 +20,7 @@ export default function Home() {
       console.log('fetchScore', data);
       setLeftScore(data.score.leftScore);
       setRightScore(data.score.rightScore);
+      setFlipped(data.score.flipped);
     }
 
     const socketInitialize = async () => {
@@ -52,10 +54,10 @@ export default function Home() {
       </Head>
       <main>
         <Box position="absolute">
-          <Image src="/SMU_TCU GAME SCORE.png" alt="SMU TCU Game Score" width={1920} height={1080} />
+          <Image src={flipped ? "/TCU_SMU GAME SCORE.png" : "/SMU_TCU GAME SCORE.png"} alt="SMU TCU Game Score" width={1920} height={1080} />
         </Box>
-        <Text pos="absolute" translateX="270px" translateY="6px" transform="auto-gpu" variant="score" w="100%" >{leftScore}</Text>
-        <Text pos="absolute" translateX="-230px" translateY="6px" transform="auto-gpu" textAlign="right" variant="score" w="100%" >{rightScore}</Text>
+        <Text pos="absolute" translateX="270px" translateY="6px" transform="auto-gpu" variant="score" w="100%" >{flipped ? rightScore : leftScore}</Text>
+        <Text pos="absolute" translateX="1630px" translateY="6px" transform="auto-gpu" textAlign="right" variant="score" >{flipped ? leftScore : rightScore}</Text>
       </main>
     </>
   )
