@@ -12,25 +12,25 @@ export default function Home() {
   const [rightScore, setRightScore] = useState(0);
 
   useEffect(() => {
+
+    const fetchScore = async () => {
+      const res = await fetch('/api/score');
+      const data = await res.json();
+      console.log('fetchScore', data);
+      setLeftScore(data.score.leftScore);
+      setRightScore(data.score.rightScore);
+    }
+
     const socketInitialize = async () => {
       // if (socket) return;
       socket = io();
-      socket.on('connect', () => {
+      socket.on('connect', async () => {
         console.log('connected');
+        await fetchScore();
       });
-      socket.on('incLeftScore', (callback) => {
-        console.log('incLeftScore', leftScore);
-        setLeftScore(leftScore + 1);
-        callback({
-          score: leftScore + 1
-        })
-      });
-      socket.on('incRightScore', (callback) => {
-        console.log('incLeftScore', rightScore);
-        setRightScore(rightScore + 1);
-        callback({
-          score: rightScore + 1
-        })
+      socket.on('updateScore', async () => {
+        console.log('updateScore', leftScore, rightScore);
+        await fetchScore();
       });
     }
 
@@ -38,8 +38,9 @@ export default function Home() {
 
     return () => {
       socket.removeAllListeners();
+      socket.disconnect();
     }
-  }, [leftScore, rightScore])
+  }, [])
 
   return (
     <>
@@ -54,7 +55,7 @@ export default function Home() {
           <Image src="/SMU_TCU GAME SCORE.png" alt="SMU TCU Game Score" width={1920} height={1080} />
         </Box>
         <Text pos="absolute" translateX="270px" translateY="6px" transform="auto-gpu" variant="score" w="100%" >{leftScore}</Text>
-        <Text pos="absolute" translateX="-390px" translateY="6px" transform="auto-gpu" textAlign="right" variant="score" w="100%" >{rightScore}</Text>
+        <Text pos="absolute" translateX="-230px" translateY="6px" transform="auto-gpu" textAlign="right" variant="score" w="100%" >{rightScore}</Text>
       </main>
     </>
   )
