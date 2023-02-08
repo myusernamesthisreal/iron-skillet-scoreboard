@@ -61,6 +61,8 @@ export default async function handler(req: NextApiRequestWithSocket, res: NextAp
                 return res.status(500).json({ message: "Error connecting to database" });
             }
         case "POST":
+            if (req.body.passphrase !== process.env.PASSPHRASE)
+                return res.status(401).json({ message: "Unauthorized" });
             if (!req.io) {
                 return res.status(500).json({ message: "Socket not initialized" });
             } else {
