@@ -1,6 +1,16 @@
 import { extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
+    styles: {
+        global: {
+            html: {
+                overflow: "hidden",
+            },
+            body: {
+                backgroundColor: "rgba(0,0,0,0)",
+            }
+        }
+    },
     components: {
         Text: {
             variants: {
@@ -10,7 +20,7 @@ const theme = extendTheme({
                     fontWeight: "500"
                 }
             }
-        }
+        },
     }
 })
 

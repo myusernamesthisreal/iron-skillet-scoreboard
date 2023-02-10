@@ -8,9 +8,7 @@ let socket: Socket;
 
 export default function Home() {
 
-  const [leftScore, setLeftScore] = useState(0);
-  const [rightScore, setRightScore] = useState(0);
-  const [flipped, setFlipped] = useState(false);
+  const [score, setScore] = useState({ flipped: false, leftScore: 0, rightScore: 0, leftGameScore: 0, rightGameScore: 0, match: 1 });
 
   useEffect(() => {
 
@@ -18,9 +16,7 @@ export default function Home() {
       const res = await fetch('/api/score');
       const data = await res.json();
       console.log('fetchScore', data);
-      setLeftScore(data.score.leftScore);
-      setRightScore(data.score.rightScore);
-      setFlipped(data.score.flipped);
+      setScore(data.score);
     }
 
     const socketInitialize = async () => {
@@ -31,7 +27,7 @@ export default function Home() {
         await fetchScore();
       });
       socket.on('updateScore', async () => {
-        console.log('updateScore', leftScore, rightScore);
+        console.log('updateScore');
         await fetchScore();
       });
     }
@@ -53,11 +49,18 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Box position="absolute">
-          <Image src={flipped ? "/TCU_SMU GAME SCORE.png" : "/SMU_TCU GAME SCORE.png"} alt="SMU TCU Game Score" width={1920} height={1080} />
+        <Box position="absolute" display="block">
+          <Image src={score.flipped ? "/TCU_SMU GAME SCORE.png" : "/SMU_TCU GAME SCORE.png"} alt="SMU TCU Game Score" width={1920} height={1080} />
         </Box>
-        <Text pos="absolute" translateX="270px" translateY="6px" transform="auto-gpu" variant="score" w="100%" >{flipped ? rightScore : leftScore}</Text>
-        <Text pos="absolute" translateX="1630px" translateY="6px" transform="auto-gpu" textAlign="right" variant="score" >{flipped ? leftScore : rightScore}</Text>
+        <Box zIndex={1} w="1920px" position="absolute">
+          <Text pos="absolute" translateX="260px" translateY="6px" transform="auto-gpu" variant="score" >{score.flipped ? score.rightScore : score.leftScore}</Text>
+          <Text pos="relative" textAlign="right" translateX="-260px" translateY="6px" transform="auto-gpu" variant="score">{score.flipped ? score.leftScore : score.rightScore}</Text>
+
+          <Text pos="absolute" translateX="915px" translateY="862px" fontSize="26px" transform="auto-gpu" variant="score" >0{score.match}</Text>
+
+          <Text pos="absolute" translateX="905px" translateY="925px" transform="auto-gpu" variant="score"  >{score.flipped ? score.leftGameScore : score.rightGameScore}</Text>
+          <Text pos="relative" textAlign="right" translateX="-1055px" translateY="925px" transform="auto-gpu" variant="score"  >{score.flipped ? score.rightGameScore : score.leftGameScore}</Text>
+        </Box>
       </main>
     </>
   )
